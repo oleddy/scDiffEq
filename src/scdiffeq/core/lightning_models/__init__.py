@@ -29,3 +29,7 @@ from ._lightning_sde_vae_fate_bias_aware import LightningSDE_VAE_FateBiasAware
 # -- reg velo ratio: ----------------------------------------------------------
 from ._lightning_sde_regularized_velocity_ratio import LightningSDE_RegularizedVelocityRatio
 from ._lightning_sde_fixed_potential_regularized_velocity_ratio import LightningSDE_FixedPotential_RegularizedVelocityRatio
+
+# -- perturbation-conditioned SDE (CD4 cytokine screen): ----------------------
+from ._conditional_sde import ConditionalNeuralSDE
+from ._conditional_vae_sde import ConditionalSDE_VAE
