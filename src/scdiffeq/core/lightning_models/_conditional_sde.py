@@ -40,6 +40,7 @@ class ConditionalNeuralSDE(torch.nn.Module):
         sigma_output_bias: bool = True,
         coef_drift: float = 1.0,
         coef_diffusion: float = 1.0,
+        diffusion_floor: float = 0.0,
         sde_type: str = "ito",
         noise_type: str = "diagonal",
     ) -> None:
@@ -50,6 +51,7 @@ class ConditionalNeuralSDE(torch.nn.Module):
         self.noise_type = noise_type  # required by torchsde
         self._coef_drift = coef_drift
         self._coef_diffusion = coef_diffusion
+        self._diffusion_floor = diffusion_floor   # additive noise the network cannot zero out
 
         self.mu = torch_nets.TorchNet(
             in_features=state_size + pert_dim, out_features=state_size,
@@ -78,8 +80,10 @@ class ConditionalNeuralSDE(torch.nn.Module):
         return self.mu(self._condition(y)) * self._coef_drift
 
     def diffusion(self, y: torch.Tensor) -> torch.Tensor:
-        # softplus keeps the diagonal diffusion non-negative
-        return torch.nn.functional.softplus(self.sigma(self._condition(y))) * self._coef_diffusion
+        # softplus keeps the diagonal diffusion non-negative; the floor is an additive
+        # minimum noise level the network cannot suppress to zero (it otherwise does).
+        sig = torch.nn.functional.softplus(self.sigma(self._condition(y))) * self._coef_diffusion
+        return sig + self._diffusion_floor
 
     # -- torchsde interface: --------------------------------------------------
     def f(self, t: torch.Tensor, y: torch.Tensor) -> torch.Tensor:

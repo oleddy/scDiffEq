@@ -34,6 +34,7 @@ class ConditionalSDE_VAE(torch.nn.Module):
         mu_hidden: Union[List[int], int] = [400, 400],
         sigma_hidden: Union[List[int], int] = [400, 400],
         coef_diffusion: float = 1.0,
+        diffusion_floor: float = 0.0,
     ) -> None:
         super().__init__()
         self.dt = dt
@@ -48,6 +49,7 @@ class ConditionalSDE_VAE(torch.nn.Module):
         self.DiffEq = ConditionalNeuralSDE(
             state_size=latent_dim, pert_dim=pert_dim,
             mu_hidden=mu_hidden, sigma_hidden=sigma_hidden, coef_diffusion=coef_diffusion,
+            diffusion_floor=diffusion_floor,
         )
 
     # -- autoencoder: ---------------------------------------------------------
